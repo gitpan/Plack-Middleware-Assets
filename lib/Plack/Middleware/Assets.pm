@@ -9,7 +9,7 @@
 #
 package Plack::Middleware::Assets;
 BEGIN {
-  $Plack::Middleware::Assets::VERSION = '0.0.1';
+  $Plack::Middleware::Assets::VERSION = '0.0.2';
 }
 
 # ABSTRACT: Concatenate and minify JavaScript and CSS files
@@ -17,7 +17,7 @@ use strict;
 use warnings;
 
 use base 'Plack::Middleware';
-__PACKAGE__->mk_accessors(qw(content minify files key mtime type));
+__PACKAGE__->mk_accessors(qw(content minify files key mtime type expires));
 
 use Digest::MD5 qw(md5_hex);
 use JavaScript::Minifier::XS ();
@@ -73,6 +73,8 @@ sub serve {
             : 'application/javascript',
             'Content-Length' => length( $self->content ),
             'Last-Modified'  => HTTP::Date::time2str( $self->mtime ),
+            'Expires' =>
+                HTTP::Date::time2str( time + ( $self->expires || 2592000 ) ),
         ],
         [ $self->content ]
     ];
@@ -107,7 +109,7 @@ Plack::Middleware::Assets - Concatenate and minify JavaScript and CSS files
 
 =head1 VERSION
 
-version 0.0.1
+version 0.0.2
 
 =head1 SYNOPSIS
 
@@ -130,8 +132,11 @@ version 0.0.1
 Plack::Middleware::Assets concatenates JavaScript and CSS files
 and minifies them. A C<md5> digest is generated and used as
 unique url to the asset. The C<Last-Modified> header is set to
-the C<mtime> of the most recently changed file.
-The concatented content is held in memory.
+the C<mtime> of the most recently changed file. The C<Expires>
+header is set to one month in advance. Set
+L</expires> to change the time of expiry.
+
+The concatented and minified content is cached in memory.
 
 =head1 DEVELOPMENT MODE
 
@@ -139,7 +144,7 @@ The concatented content is held in memory.
  
  $ starman -E development app.psgi
 
-In development mode the minification is disabled and and the
+In development mode the minification is disabled and the
 concatenated content is regenerated if there were any changes
 to the files.
 
@@ -161,13 +166,18 @@ Type of the asset. Either C<css> or C<js>. This is derived automatically
 from the file extensions but can be set explicitly if you are using
 non-standard file extensions.
 
+=item expires
+
+Time in seconds from now (i.e. C<time>) until the resource expires.
+
 =back
 
 =head1 TODO
 
 Allow to concatenate documents from URLs, such that you can have a
 L<Plack::Middleware::File::Sass> that converts SASS files to CSS and
-concatenate those with other CSS files.
+concatenate those with other CSS files. Also concatenate content from
+CDNs that host common JavaScript libraries.
 
 =head1 SEE ALSO
 

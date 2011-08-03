@@ -23,7 +23,7 @@ my %module_build_args = (
     'Moritz Onken'
   ],
   'dist_name' => 'Plack-Middleware-Assets',
-  'dist_version' => '0.0.1',
+  'dist_version' => '0.0.2',
   'license' => 'bsd',
   'module_name' => 'Plack::Middleware::Assets',
   'recommends' => {},
