@@ -2,7 +2,7 @@
 #
 # This file is part of Plack-Middleware-Assets
 #
-# This software is Copyright (c) 2011 by Moritz Onken.
+# This software is Copyright (c) 2013 by Moritz Onken.
 #
 # This is free software, licensed under:
 #
